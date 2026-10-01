@@ -1,4 +1,4 @@
-name: Build Android Release
+name: Flutter Android Build
 
 on:
   push:
@@ -9,35 +9,39 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
+          distribution: 'temurin'
           java-version: '17'
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.x'
           channel: 'stable'
+          cache: true
 
-      - name: Build APK and App Bundle
+      - name: Get dependencies
         working-directory: crypto_calc
-        run: |
-          flutter pub get
-          flutter build apk --release
-          flutter build appbundle --release
+        run: flutter pub get
 
-      - name: Upload APK Artifact
+      - name: Build APK
+        working-directory: crypto_calc
+        run: flutter build apk --release
+
+      - name: Build App Bundle (AAB)
+        working-directory: crypto_calc
+        run: flutter build appbundle --release
+
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-release-apk
           path: crypto_calc/build/app/outputs/flutter-apk/app-release.apk
 
-      - name: Upload AAB Artifact
+      - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
           name: app-release-aab
